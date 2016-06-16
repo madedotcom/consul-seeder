@@ -1,44 +1,27 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
-import GHC.Generics
+import Options
+import Model
+import Client
+import System.Exit
 import Data.Yaml
-import Network.HTTP.Simple 
+import Control.Monad
+import Text.Read
+import System.IO
+import System.Console.GetOpt
+import Network.HTTP.Simple
 import System.Environment
-import qualified Data.ByteString.Lazy.Char8 as BS
-
-
-data ConsulKV = ConsulKV { key :: String, value :: String } 
-    deriving (Generic, Show)
-instance FromJSON ConsulKV
-
-
-read :: FilePath -> IO (Maybe [ConsulKV])
-read = decodeFile  
-
-
-setKey ::String -> ConsulKV -> IO ()
-setKey hostname kv = do
-    request' <- parseRequest ("PUT http://" ++ hostname ++ ":8500/v1/kv/" ++ key kv)
-    let request 
-            = setRequestBodyLBS (BS.pack $ value kv)
-            $ request'
-    response <- httpLBS request
-    putStrLn $ key kv ++ " -> " ++ value kv ++ " " ++
-               show (getResponseStatusCode response)
-    
-setKeys :: Maybe [ConsulKV] -> IO ()
-setKeys Nothing = putStrLn "nope"
-setKeys (Just keys) = mapM_ (setKey "localhost") keys
-
-
-
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Lazy.Char8 as LBS
 
 main :: IO ()
 main = do
-    args <- getArgs
-    case length args of
-        1 -> do s <- Main.read $ head args
-                setKeys s
-        _ -> putStrLn "arse"
+    opts <- getArgs >>= parseArgs
+    yaml <- BS.pack <$> input opts
+    case decodeEither yaml :: Either String [ConsulKV] of
+        Left err -> do
+            putStrLn err
+            exitFailure
+        Right keys -> putStrLn "yay"
