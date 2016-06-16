@@ -1,8 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Client (setKeys) where
 
 import Options
 import Model
-import System.Exit
 import Network.HTTP.Simple
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as LBS
@@ -12,11 +12,13 @@ requestTemplate opts =
     let req = 
             case token opts of
                 Nothing -> defaultRequest
-                Just token -> 
+                Just t -> 
                     setRequestQueryString
-                        [(BS.pack "token", Just (BS.pack token))]
+                        [(BS.pack "token", Just (BS.pack t))]
                         $defaultRequest
-    in setRequestHost (BS.pack $ host opts) $ setRequestPort (port opts) req
+    in setRequestHost (BS.pack $ host opts) 
+       $ setRequestMethod "PUT"
+       $ setRequestPort (port opts) req
 
 setKey :: Request -> ConsulKV -> IO ()
 setKey req kv = do
