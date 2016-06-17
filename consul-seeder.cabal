@@ -18,7 +18,6 @@ Library
   build-depends:     base
                    , http-conduit
                    , bytestring
-                   , yaml
   default-language:    Haskell2010
   ghc-options:      -Wall
   exposed-modules:   Options
