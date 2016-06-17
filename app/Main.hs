@@ -3,19 +3,23 @@
 module Main where
 
 import Options
-import Model
+import Data.Maybe
 import Client (setKeys)
-import System.Exit
-import Data.Yaml
+import Data.Yaml.YamlLight (unStr, YamlLight, parseYaml, getTerminalsKeys)
 import System.Environment
-import qualified Data.ByteString.Char8 as BS
+import Data.ByteString.Char8 (ByteString, intercalate)
+
+keysToStrings :: [YamlLight] -> [ByteString]
+keysToStrings = reverse . mapMaybe unStr
+
+flatten :: (ByteString, [YamlLight]) -> (ByteString, ByteString)
+flatten (v,k) = (v, intercalate "/" $ keysToStrings k)
+
+flatkeys :: YamlLight -> [(ByteString, ByteString)]
+flatkeys = map flatten . getTerminalsKeys
 
 main :: IO ()
 main = do
     opts <- getArgs >>= parseArgs
-    yaml <- BS.pack <$> input opts
-    case decodeEither yaml :: Either String [ConsulKV] of
-        Left err -> do
-            putStrLn err
-            exitFailure
-        Right keys -> setKeys opts keys
+    parseYaml <$> input opts >>= fmap flatkeys >>= setKeys opts
+    

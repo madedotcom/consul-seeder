@@ -18,8 +18,8 @@ Library
   build-depends:     base
                    , http-conduit
                    , bytestring
-                   , yaml
   default-language:    Haskell2010
+  ghc-options:      -Wall
   exposed-modules:   Options
                    , Model
                    , Client
@@ -30,9 +30,10 @@ executable consul-seeder
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:       base
                      , bytestring
-                     , yaml
+                     , yaml-light
                      , http-conduit
                      , consul-seeder
+                     , text
   default-language:    Haskell2010
 
 source-repository head

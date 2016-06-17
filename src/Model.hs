@@ -1,13 +1,5 @@
-{-# LANGUAGE DeriveGeneric #-}
+module Model (ConsulKV) where
 
-module Model (ConsulKV, key, value) where
+import Data.ByteString.Char8 (ByteString)
 
-import GHC.Generics
-import Data.Yaml
-
-data ConsulKV = ConsulKV
-    { key :: String
-    , value :: String
-    } deriving (Generic,Show)
-
-instance FromJSON ConsulKV
+type ConsulKV = (ByteString, ByteString)
